@@ -1,0 +1,200 @@
+/* 
+ * File:   newmain.c
+ * Author: dr Vladimir Rajs
+ * Opis programa: Program koji omogucava da pritiskom na taster promenimo stanje diode
+*  Kori??eni taster je RD0, a dioda RB0
+ * Otklonjena je mogucnost 'odskakanja tastera'.
+ *
+ * Created on 16. mart 2017., 11.07
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include<p30fxxxx.h>
+
+_FOSC(CSW_FSCM_OFF & XT_PLL4);//instruction takt je isti kao i kristal
+_FWDT(WDT_OFF);
+
+int stanje0, stanje1, stanje2, stanje3, stanje4, stanje5, stanje6, stanje7, brojac, i = 0;
+int taster7, taster1=0;
+
+
+int sifra[4] = {2, 3, 5, 1};
+int uneto[4];
+
+int main(int argc, char** argv) {
+
+    
+    ADPCFGbits.PCFG0=1;//kazemo da nije analogni vec digitalni pin
+    ADPCFGbits.PCFG1=1;//kazemo da nije analogni vec digitalni pin
+    ADPCFGbits.PCFG2=1;//kazemo da nije analogni vec digitalni pin
+    ADPCFGbits.PCFG3=1;//kazemo da nije analogni vec digitalni pin
+    ADPCFGbits.PCFG4=1;//kazemo da nije analogni vec digitalni pin
+    ADPCFGbits.PCFG5=1;//kazemo da nije analogni vec digitalni pin
+    ADPCFGbits.PCFG6=1;//kazemo da nije analogni vec digitalni pin
+    ADPCFGbits.PCFG7=1;//kazemo da nije analogni vec digitalni pin
+    
+    TRISB=0xffff;//konfigurisemo kao ulaz
+    
+	TRISD=0x0000;//konfigurisemo kao izlaz
+    
+    
+	while(1)
+		{
+		START:	if(PORTBbits.RB0==1)
+				{
+					if(stanje0<21)//stanje-taster mora da bude pritisnut jedno vreme
+      					stanje0++;
+				}
+			else
+      				stanje0=0;//taster nije bio dovoljno dugo pritisnut
+
+			if(stanje0==20)//ako je taster zadrzan u pritisnutom stanju jedno vreme smatramo ga pritisnutim;ovim otklanjamo mogucnost 'odskakanja tastera'
+            {
+                uneto[brojac] = 0;
+                stanje0=0;
+                brojac++;
+            }/////////////////////////////////////////////////////////////////////////////////// taster RB0 unosi 0 u niz
+		
+            
+            if(PORTBbits.RB1==1)
+				{
+					if(stanje1<21)
+      					stanje1++;
+				}
+			else
+      				stanje1=0;
+
+			if(stanje1==20)
+            {
+                taster1=1;  
+            }
+            if(taster1=1)
+            {
+                uneto[brojac] = 1;
+                stanje1=0;
+                brojac++;
+                LATDbits.LATD3=1;
+            }/////////////////////////////////////////////////////////////////////////////////// taster RB1 unosi 1 u niz
+            
+            if(PORTBbits.RB2==1)
+				{
+					if(stanje2<21)
+      					stanje2++;
+				}
+			else
+      				stanje2=0;
+
+			if(stanje2==20)
+            {
+                uneto[brojac] = 2;
+                stanje2=0;
+                brojac++;
+            }/////////////////////////////////////////////////////////////////////////////////// taster RB2 unosi 2 u niz
+            
+            
+            if(PORTBbits.RB3==1)
+				{
+					if(stanje3<21)
+      					stanje3++;
+				}
+			else
+      				stanje3=0;
+
+			if(stanje3==20)
+            {
+                uneto[brojac] = 3;
+                stanje3=0;
+                brojac++;
+            }/////////////////////////////////////////////////////////////////////////////////// taster RB3 unosi 3 u niz
+            
+            
+            if(PORTBbits.RB4==1)
+				{
+					if(stanje4<21)
+      					stanje4++;
+				}
+			else
+      				stanje4=0;
+
+			if(stanje4==20)
+            {
+                uneto[brojac] = 4;
+                stanje4=0;
+                brojac++;
+            }/////////////////////////////////////////////////////////////////////////////////// taster RB4 unosi 4 u niz
+            
+            if(PORTBbits.RB5==1)
+				{
+					if(stanje5<21)
+      					stanje5++;
+				}
+			else
+      				stanje5=0;
+
+			if(stanje5==20)
+            {
+                uneto[brojac] = 5;
+                stanje5=0;
+                brojac++;
+            }/////////////////////////////////////////////////////////////////////////////////// taster RB5 unosi 5 u niz
+            
+            if(PORTBbits.RB6==1)
+				{
+					if(stanje6<21)
+      					stanje6++;
+				}
+			else
+      				stanje6=0;
+
+			if(stanje6==20)
+            {
+                uneto[brojac] = 6;
+                stanje6=0;
+                brojac++;
+            }/////////////////////////////////////////////////////////////////////////////////// taster RB6 unosi 6 u niz
+            
+            if(PORTBbits.RB7==1)
+				{
+					if(stanje7<21)
+      					stanje7++;
+				}
+			else
+      				stanje7=0;
+
+			if(stanje7==20)
+            {
+                taster7=1;
+                uneto[brojac] = 7;
+                stanje7=0;
+                brojac++;
+            }/////////////////////////////////////////////////////////////////////////////////// taster RB7 unosi 7 u niz
+            
+            
+            if(brojac==4)
+            {
+                i=0;
+                for(brojac=0; brojac<4; brojac++)
+                {
+                    if(uneto[brojac]==sifra[brojac])
+                        i++;
+                }
+                brojac=0;
+                if(i==4)
+                    goto USPEH;
+                else
+                    goto PROMASAJ;
+            }
+		}//while  
+
+ PROMASAJ: LATDbits.LATD1=1;
+ goto START;
+ USPEH: LATDbits.LATD2=1;
+ goto START;
+    
+    
+    
+    
+    return (EXIT_SUCCESS);
+}
+
